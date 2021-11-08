@@ -7,10 +7,13 @@ import pandas as pd
 import altair as alt
 from streamlit.state.session_state import Value
 
-st.set_page_config(page_title = "HW4 Leo Cheung", page_icon = ":keycap_ten:")
+#GitHub emojis
+#https://raw.githubusercontent.com/omnidan/node-emoji/master/lib/emoji.json
+
+st.set_page_config(page_title = "HW4 Leo Cheung", page_icon = ":ocean:")
 
 #step 1: make a title
-st.title("Math 10 Homework 4")
+st.title("Math :keycap_ten: Homework 4")
 
 #step 2: write name, ID, and GitHub link
 st.markdown("Author: Leo Cheung, [GitHub link](https://github.com/ctZN4)")
@@ -20,10 +23,8 @@ u_input = st.text_input('Please input your name')
 if u_input == "":
     st.stop()
 else:
-    st.success(f"Hello and welcome, {u_input}!")
+    st.success(f":heavy_check_mark: Hello and welcome, {u_input}!")
 
-    #step 3: upload window for a CSV file
-    filename = st.file_uploader(label = "Please upload a CSV file here", type = "csv")
 
     #function that tests if a column in a DataFrame can be numeric
     def can_be_numeric(df,c):
@@ -34,9 +35,18 @@ else:
             return False
 
     try:
+        #step 3: upload window for a CSV file
+        filename = st.file_uploader(label = "Please upload a CSV file here", type = "csv")
+        if "fn" not in st.session_state:
+            st.session_state["fn"] = filename
+        #else:
+            #filename = st.session_state["fn"]
+
         #stops the rest from running if file is not uploaded
         if filename == None:
             raise FileNotFoundError()
+        
+        
 
         #step 4: read the CSV input
         df = pd.read_csv(filename)
@@ -62,15 +72,15 @@ else:
         choiceY = st.selectbox(label = "Choose the y-axis for the plot", options = num_cols)
 
         #step 9: slider for choosing the range of x axis, defaults to 100
-        choiceRange = st.slider(label = "Choose the range for the plot", max_value = len(df1), value = 256)
+        choiceRange = st.slider(label = "Choose the range for the plot", min_value = 0, max_value = len(df1) - 1, value = (0, len(df1)))
 
         #step 10: prints out the user's choice
         st.write(f"You have chosen {choiceX} as the x-axis, {choiceY} as the y-axis, and {choiceRange} as the maximum row.")
 
         #step 11: chart out the plot, then display in streamlit
-        charted = alt.Chart(df1[0:choiceRange]).mark_circle().encode(
-            x = alt.X(choiceX),
-            y = alt.Y(choiceY),
+        charted = alt.Chart(df1[choiceRange[0]:choiceRange[1]]).mark_circle().encode(
+            x = alt.X(choiceX, scale=alt.Scale(zero=False)),
+            y = alt.Y(choiceY, scale=alt.Scale(zero=False)),
             color = alt.Color(choiceX, scale = alt.Scale(scheme = "greenblue")),
         ).properties(
             width = 800,
